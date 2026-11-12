@@ -6,10 +6,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from werkzeug.security import generate_password_hash
 from database.conexion import ejecutar, consultar
 
-if len(sys.argv) != 3:
-    print("Uso: python crear_admin.py correo contraseña")
-    sys.exit(1)
-
 def crear(correo, contrasena):
     hash_nuevo = generate_password_hash(contrasena)
     existe = consultar("SELECT id_usuario FROM usuarios WHERE correo = %s", (correo,), uno=True)
@@ -24,6 +20,9 @@ def crear(correo, contrasena):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print("Uso: python crear_admin.py correo contraseña")
+        sys.exit(1)
     correo, contrasena = sys.argv[1], sys.argv[2]
     hash_nuevo = generate_password_hash(contrasena)
     existe = consultar("SELECT id_usuario FROM usuarios WHERE correo = %s", (correo,), uno=True)
