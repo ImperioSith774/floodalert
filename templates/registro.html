@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="auth-wrap">
+  <div class="card-fa auth-card">
+    <div class="text-center mb-4">
+      <span class="brand-dot" style="width:34px;height:34px;font-size:15px;border-radius:9px">F</span>
+      <h4 class="mt-3 mb-1">Crear cuenta</h4>
+      <p class="text-muted-f mb-0" style="font-size:13.5px">Solo necesitamos lo indispensable.</p>
+    </div>
+
+    <form method="POST" id="form-registro" novalidate>
+      <div class="mb-3">
+        <label class="form-label-fa" for="nombre">Nombre completo</label>
+        <input class="form-control-fa form-control" id="nombre" name="nombre"
+               placeholder="Nombre y apellido" required minlength="3" maxlength="120">
+      </div>
+      <div class="mb-3">
+        <label class="form-label-fa" for="correo">Correo</label>
+        <input type="email" class="form-control-fa form-control" id="correo" name="correo"
+               placeholder="tucorreo@ejemplo.co" required maxlength="150">
+      </div>
+      <div class="mb-3">
+        <label class="form-label-fa" for="contrasena">Contraseña</label>
+        <input type="password" class="form-control-fa form-control" id="contrasena" name="contrasena"
+               placeholder="Mínimo 8 caracteres" required minlength="8">
+        <div class="form-hint">Al menos 8 caracteres, con letras y números.</div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label-fa" for="confirmacion">Confirmar contraseña</label>
+        <input type="password" class="form-control-fa form-control" id="confirmacion" name="confirmacion"
+               placeholder="••••••••" required>
+      </div>
+      <button class="btn btn-primary-fa w-100" type="submit">Crear cuenta</button>
+    </form>
+
+    <p class="text-center text-muted-f mt-4 mb-0" style="font-size:13.5px">
+      ¿Ya tienes cuenta? <a href="{{ url_for('r_usuarios.login') }}">Iniciar sesión</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('form-registro').addEventListener('submit', function (e) {
+  const c1 = document.getElementById('contrasena'), c2 = document.getElementById('confirmacion');
+  if (c1.value !== c2.value) {
+    e.preventDefault();
+    c1.classList.add('is-invalid'); c2.classList.add('is-invalid');
+    alert('Las contraseñas no coinciden.');
+  }
+});
+</script>
+{% endblock %}

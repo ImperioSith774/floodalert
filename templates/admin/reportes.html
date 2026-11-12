@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block contenido %}
+<section class="section-pad-sm">
+  <div class="container" style="max-width:1200px">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <span class="label-eyebrow d-block mb-2">Gestión</span>
+        <h1 class="mb-1" style="font-size:1.6rem">Reportes de inundación</h1>
+        <p class="text-muted-f mb-0" style="font-size:14px">Revisa evidencias, cambia estados y deja comentarios registrados en el historial.</p>
+      </div>
+      <span class="badge-nivel">{{ reportes|length }} reportes</span>
+    </div>
+
+    <!-- Filtros -->
+    <form class="row g-2 mb-4 align-items-end" method="GET">
+      <div class="col-lg-4">
+        <label class="form-label-fa">Buscar</label>
+        <input class="form-control-fa form-control" name="q" value="{{ q }}" placeholder="Barrio o descripción…">
+      </div>
+      <div class="col-lg-3">
+        <label class="form-label-fa">Estado</label>
+        <select class="form-select f w-100" name="estado">
+          <option value="">Todos</option>
+          {% for k, v in nombres_estado.items() %}
+          <option value="{{ k }}" {{ 'selected' if estado == k }}>{{ v }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-3">
+        <label class="form-label-fa">Municipio</label>
+        <select class="form-select f w-100" name="municipio">
+          <option value="">Todos</option>
+          {% for m in municipios %}
+          <option value="{{ m.id_municipio }}" {{ 'selected' if municipio|string == m.id_municipio|string }}>{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-2">
+        <button class="btn btn-primary-fa w-100">Filtrar</button>
+      </div>
+    </form>
+
+    <div class="card-fa overflow-x-auto">
+      <table class="table table-fa">
+        <thead>
+          <tr>
+            <th style="width:60px">Foto</th>
+            <th>Ubicación</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th style="width:190px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reportes %}
+          <tr>
+            <td>
+              {% if r.foto %}<a href="/uploads/{{ r.foto }}" target="_blank"><img class="foto-mini" src="/uploads/{{ r.foto }}" alt="Evidencia"></a>
+              {% else %}<div class="foto-mini"></div>{% endif %}
+            </td>
+            <td>
+              <div class="fw-medium">{{ r.barrio }}</div>
+              <div class="report-meta">{{ r.municipio }} · {{ r.reportador }}</div>
+              {% if r.denuncias %}<span class="badge-fa badge-rechazado mt-1">Denunciado ×{{ r.denuncias }}</span>{% endif %}
+            </td>
+            <td style="max-width:300px">
+              <span class="d-inline-block text-truncate" style="max-width:300px" title="{{ r.descripcion }}">{{ r.descripcion }}</span>
+            </td>
+            <td>
+              {% set estado = r.estado %}{% include "parciales/estado.html" ignore missing %}
+            </td>
+            <td class="report-meta">{{ r.creado_en.strftime('%d %b, %H:%M') }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{{ url_for('r_incidentes.detalle', id_inc=r.id_incidente) }}" class="btn btn-secondary-fa btn-sm">
+                  Ver
+                </a>
+                {% if r.estado == 'pendiente' %}
+                <form method="POST" action="{{ url_for('r_admin.cambiar_estado', id_inc=r.id_incidente) }}">
+                  <input type="hidden" name="estado" value="verificado">
+                  <input type="hidden" name="comentario" value="Información revisada y validada">
+                  <button class="btn btn-primary-fa btn-sm" title="Marcar como válido (se publicará en el sitio)">Aprobar</button>
+                </form>
+                <form method="POST" action="{{ url_for('r_admin.cambiar_estado', id_inc=r.id_incidente) }}">
+                  <input type="hidden" name="estado" value="rechazado">
+                  <input type="hidden" name="comentario" value="Información inválida o sin verificación">
+                  <button class="btn btn-secondary-fa btn-sm" title="Marcar como inválido (no se mostrará en el sitio)">Rechazar</button>
+                </form>
+                {% else %}
+                <form class="d-flex gap-1" method="POST" action="{{ url_for('r_admin.cambiar_estado', id_inc=r.id_incidente) }}">
+                  <input type="hidden" name="comentario" value="Revisado desde el panel">
+                  <select name="estado" class="form-select f form-control-fa" style="width:130px; font-size:13px">
+                    {% set r_estados = ('seguimiento','atendido','cerrado','rechazado') %}
+                    {% for e in r_estados %}
+                    <option value="{{ e }}">{{ nombres_estado[e] }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn btn-secondary-fa btn-sm px-2">✓</button>
+                </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center text-muted-f py-5">No hay reportes con estos filtros.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

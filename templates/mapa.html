@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block contenido %}
+<section class="section-pad-sm">
+  <div class="container-fluid px-0" style="max-width:1440px">
+    <div class="container">
+      <span class="label-eyebrow d-block mb-2">Mapa de inundaciones</span>
+      <h1 class="mb-2" style="font-size:1.6rem">Incidentes en el Chocó</h1>
+      <p class="text-muted-f mb-4" style="font-size:14px">Filtra por municipio y estado, y haz clic en un punto para ver el detalle del reporte.</p>
+    </div>
+
+    <div class="row g-0" style="height:640px">
+      <!-- Barra de filtros -->
+      <div class="col-lg-3 px-3 pb-3 pb-lg-0 pt-1 border-end" style="border-color:var(--border)!important; overflow-y:auto">
+        <span class="label-eyebrow d-block mb-2">Filtros</span>
+        <select class="form-select f mb-2" id="f-municipio">
+          <option value="">Todos los municipios</option>
+          {% for m in municipios %}
+          <option value="{{ m.id_municipio }}">{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+        <select class="form-select f mb-3" id="f-estado">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente de revisión</option>
+          <option value="verificado">Verificado</option>
+          <option value="seguimiento">En seguimiento</option>
+          <option value="atendido">Atendido</option>
+          <option value="cerrado">Cerrado</option>
+        </select>
+
+        <span class="label-eyebrow d-block mb-2 mt-3">Reportes <span id="contador" class="fw-semibold">(0)</span></span>
+        <div id="lista-puntos" style="max-height:420px; overflow-y:auto"></div>
+      </div>
+
+      <!-- Mapa -->
+      <div class="col-lg-9">
+        <div id="mapa" style="height:640px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/mapa.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block contenido %}
+<section class="section-pad-sm">
+  <div class="container" style="max-width:820px">
+    <a href="/mis-reportes" class="report-meta d-inline-block mb-3">← Volver a mis reportes</a>
+    <h1 class="mb-2" style="font-size:1.75rem">Reportar inundación</h1>
+    <p class="text-muted-f" style="font-size:14px; max-width:56ch">
+      Describe lo más concreto posible: calle, referencia, altura del agua y a qué hora lo observaste.
+      Los datos falsos o exagerados afectan la respuesta de todos.
+    </p>
+
+    <form method="POST" enctype="multipart/form-data" class="mt-4" id="form-reporte" novalidate>
+
+      <div class="card-fa p-4 mb-4">
+        <span class="label-eyebrow d-block mb-3">Ubicación</span>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label-fa" for="municipio">Municipio</label>
+            <select class="form-select f w-100" id="municipio" name="municipio" required>
+              <option value="" disabled selected>Selecciona el municipio</option>
+              {% for m in municipios %}
+              <option value="{{ m.id_municipio }}" data-lat="{{ m.lat }}" data-lng="{{ m.lng }}">{{ m.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-fa" for="barrio">Barrio / vereda</label>
+            <input class="form-control-fa form-control" id="barrio" name="barrio"
+                   placeholder="Ej. Barrio Avenida Tripoli" required maxlength="120">
+          </div>
+        </div>
+
+        <label class="form-label-fa mt-3">Marca el punto exacto</label>
+        <div id="mapa-ubicacion" class="mapa-ubicacion"></div>
+        <div class="form-hint d-flex justify-content-between">
+          <span>Haz clic en el mapa para colocar el marcador.</span>
+          <span id="coord-texto" class="fw-medium">Sin ubicación</span>
+        </div>
+        <input type="hidden" name="lat" id="lat">
+        <input type="hidden" name="lng" id="lng">
+      </div>
+
+      <div class="card-fa p-4 mb-4">
+        <span class="label-eyebrow d-block mb-3">El incidente</span>
+        <div class="mb-3">
+          <label class="form-label-fa" for="descripcion">¿Qué está sucediendo?</label>
+          <textarea class="form-control-fa form-control" id="descripcion" name="descripcion"
+                    rows="4" placeholder="Ej. El río creció esta noche y el agua ya entra a las primeras casas de la calle 12…" required minlength="20" maxlength="2000"></textarea>
+          <div class="form-hint">Mínimo 20 caracteres. Evita datos personales de terceros.</div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label-fa" for="nivel">Nivel del agua</label>
+            <select class="form-select f w-100" id="nivel" name="nivel" required>
+              <option value="" disabled selected>Selecciona la gravedad</option>
+              {% for n in niveles %}
+              <option value="{{ n }}">{{ {'tobillo':'Hasta el tobillo','rodilla':'Hasta la rodilla','cintura':'Hasta la cintura','pecho':'Hasta el pecho','techo':'Sobre el techo'}[n] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label-fa" for="fecha">Fecha y hora</label>
+            <input type="datetime-local" class="form-control-fa form-control" id="fecha" name="fecha"
+                   max="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+            <div class="form-hint">Déjalo vacío si es «ahora mismo».</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-fa p-4 mb-4">
+        <span class="label-eyebrow d-block mb-3">Fotografías (opcional)</span>
+        <input type="file" class="form-control-fa" name="fotos" id="fotos"
+               accept="image/png,image/jpeg,image/webp" multiple>
+        <div class="form-hint">Máximo 3 imágenes · PNG, JPG o WebP · hasta 5 MB cada una.</div>
+        <div id="vista-previa" class="d-flex gap-2 mt-3 flex-wrap"></div>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="/mis-reportes" class="btn btn-secondary-fa">Cancelar</a>
+        <button type="submit" class="btn btn-primary-fa">Enviar reporte</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/reporte.js') }}"></script>
+{% endblock %}

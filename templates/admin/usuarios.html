@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block contenido %}
+<section class="section-pad-sm">
+  <div class="container" style="max-width:1100px">
+    <span class="label-eyebrow d-block mb-2">Gestión</span>
+    <h1 class="mb-4" style="font-size:1.6rem">Usuarios</h1>
+
+    <div class="card-fa overflow-x-auto">
+      <table class="table table-fa">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Registrado</th>
+            <th style="width:230px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+          <tr>
+            <td class="fw-medium">{{ u.nombre_completo }}</td>
+            <td class="report-meta">{{ u.correo }}</td>
+            <td>
+              {% set estado = 'verificado' if u.rol == 'administrador' else 'cerrado' %}
+              <span class="badge-fa badge-{{ estado }}">{{ 'Administrador' if u.rol == 'administrador' else 'Ciudadano' }}</span>
+            </td>
+            <td>
+              {% if u.activo %}<span class="badge-fa badge-atendido">Activo</span>
+              {% else %}<span class="badge-fa badge-rechazado">Desactivado</span>{% endif %}
+            </td>
+            <td class="report-meta">{{ u.creado_en.strftime('%d %b %Y') }}</td>
+            <td>
+              {% if u.id_usuario == session.usuario_id %}
+              <span class="report-meta">Tu cuenta</span>
+              {% else %}
+              <div class="d-flex gap-1">
+                <form method="POST" action="{{ url_for('r_admin.cambiar_rol', id_usuario=u.id_usuario) }}" class="d-flex gap-1">
+                  <select name="rol" class="form-select f" style="width:130px; font-size:13px">
+                    <option value="ciudadano" {{ 'selected' if u.rol == 'ciudadano' }}>Ciudadano</option>
+                    <option value="administrador" {{ 'selected' if u.rol == 'administrador' }}>Administrador</option>
+                  </select>
+                  <button type="submit" class="btn btn-secondary-fa btn-sm px-2">✓</button>
+                </form>
+                <form method="POST" action="{{ url_for('r_admin.cambiar_activo', id_usuario=u.id_usuario) }}">
+                  <button class="btn btn-ghost-danger btn-sm px-2">{{ 'Activar' if not u.activo else 'Desactivar' }}</button>
+                </form>
+              </div>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

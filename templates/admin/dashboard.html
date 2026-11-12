@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block contenido %}
+<section class="section-pad-sm">
+  <div class="container" style="max-width:1100px">
+    <span class="label-eyebrow d-block mb-2">Panel administrativo</span>
+    <h1 class="mb-4" style="font-size:1.6rem">Resumen de la operación</h1>
+
+    <!-- Métricas -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3"><div class="card-fa stat-card">
+        <span class="label-eyebrow">Reportes totales</span>
+        <div class="stat-value mt-1">{{ stats.total }}</div></div></div>
+      <div class="col-6 col-lg-3"><div class="card-fa stat-card">
+        <span class="label-eyebrow">Pendientes de revisión</span>
+        <div class="stat-value mt-1" style="color:var(--st-pendiente)">{{ stats.pendientes }}</div></div></div>
+      <div class="col-6 col-lg-3"><div class="card-fa stat-card">
+        <span class="label-eyebrow">Últimos 7 días</span>
+        <div class="stat-value mt-1">{{ stats.semana }}</div></div></div>
+      <div class="col-6 col-lg-3"><div class="card-fa stat-card">
+        <span class="label-eyebrow">Usuarios activos</span>
+        <div class="stat-value mt-1">{{ stats.usuarios }}</div></div></div>
+    </div>
+
+    {% if stats.denuncias %}
+    <div class="card-fa p-3 mb-4 d-flex justify-content-between align-items-center" style="border-color:#eeddb9; background:var(--st-pendiente-bg)">
+      <p class="mb-0" style="font-size:14px">Hay <strong>{{ stats.denuncias }}</strong> denuncia(s) de reportes posiblemente falsos para revisar.</p>
+      <a href="{{ url_for('r_admin.reportes') }}" class="btn btn-secondary-fa">Revisar reportes</a>
+    </div>
+    {% endif %}
+
+    {% if pendientes %}
+    <div class="d-flex justify-content-between align-items-end mb-3">
+      <h2 class="mb-0" style="font-size:1.15rem">Revisiones pendientes</h2>
+      <a href="{{ url_for('r_admin.reportes', estado='pendiente') }}" class="btn btn-secondary-fa">Ver todas</a>
+    </div>
+    <div class="d-flex flex-column gap-3 mb-4">
+      {% for r in pendientes[:2] %}
+      <div class="card-fa tarjeta-revision">
+        <div class="d-flex flex-column flex-md-row gap-3">
+          {% if r.foto %}
+          <a href="/uploads/{{ r.foto }}" target="_blank" class="flex-shrink-0">
+            <img src="/uploads/{{ r.foto }}" alt="Evidencia" style="width:140px;height:100px;object-fit:cover;border-radius:10px">
+          </a>
+          {% endif %}
+          <div class="flex-grow-1">
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+              <strong>{{ r.barrio }}</strong>
+              <span class="report-meta">{{ r.municipio }} · <a href="{{ url_for('r_incidentes.detalle', id_inc=r.id_incidente) }}" class="text-decoration-none">Ver detalle completo</a></span>
+              {% if r.denuncias %}<span class="badge-fa badge-rechazado">Denunciado ×{{ r.denuncias }}</span>{% endif %}
+            </div>
+            <p class="mb-1" style="font-size:14px">{{ r.descripcion }}</p>
+            <div class="report-meta">
+              Reportado por {{ r.reportador }} · nivel: {{ r.nivel_agua }} · enviado el {{ r.creado_en.strftime('%d %b %Y, %H:%M') }}
+            </div>
+          </div>
+          <div class="d-flex flex-column justify-content-center gap-2 flex-shrink-0" style="min-width:200px">
+            <form method="POST" action="{{ url_for('r_admin.cambiar_estado', id_inc=r.id_incidente) }}">
+              <input type="hidden" name="estado" value="verificado">
+              <input type="hidden" name="comentario" value="Información revisada y validada">
+              <button class="btn btn-primary-fa w-100">Aprobar</button>
+            </form>
+            <form method="POST" action="{{ url_for('r_admin.cambiar_estado', id_inc=r.id_incidente) }}">
+              <input type="hidden" name="estado" value="rechazado">
+              <input type="hidden" name="comentario" value="Información inválida o sin verificación">
+              <button class="btn btn-secondary-fa w-100">Rechazar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+      <!-- Actividad por municipio -->
+      <div class="col-lg-7">
+        <div class="card-fa p-4">
+          <span class="label-eyebrow d-block mb-3">Reportes por municipio</span>
+          {% set maximo = por_municipio[0].n if por_municipio else 1 %}
+          {% set maximo = [maximo, 1]|max %}
+          {% for m in por_municipio %}
+          <div class="mb-3" style="{{ 'margin-bottom:0!important' if loop.last }}">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="fw-medium" style="font-size:13.5px">{{ m.nombre }}</span>
+              <span class="report-meta">{{ m.n }}</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:{{ (m.n * 100 / maximo)|round|int if m.n else 0 }}%"></div>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-muted-f mb-0" style="font-size:13.5px">Sin datos todavía.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Distribución de estados -->
+      <div class="col-lg-5">
+        <div class="card-fa p-4">
+          <span class="label-eyebrow d-block mb-3">Estados de los reportes</span>
+          {% for estado, etiqueta in nombres_estado.items() %}
+            {% if estados.get(estado) %}
+            <div class="d-flex justify-content-between align-items-center py-2 {{ 'border-bottom' if not loop.last }}"
+                 style="{{ 'border-color:var(--border)' if not loop.last else '' }}">
+              {% set estado = estado %}{% include "parciales/estado.html" ignore missing %}
+              <span class="fw-semibold">{{ estados[estado] }}</span>
+            </div>
+            {% endif %}
+          {% endfor %}
+          {% if not estados %}
+          <p class="text-muted-f mb-0" style="font-size:13.5px">Sin datos todavía.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

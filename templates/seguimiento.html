@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block contenido %}
+<section class="section-pad-sm">
+  <div class="container" style="max-width:900px">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <span class="label-eyebrow d-block mb-2">Seguimiento</span>
+        <h1 class="mb-1" style="font-size:1.6rem">Mis reportes</h1>
+        <p class="text-muted-f mb-0" style="font-size:14px">Consulta el estado y la evolución de cada incidente que reportaste.</p>
+      </div>
+      <a href="{{ url_for('r_incidentes.reportar') }}" class="btn btn-primary-fa">Nuevo reporte</a>
+    </div>
+
+    <div class="card-fa overflow-hidden">
+      {% for r in reportes %}
+      <a href="{{ url_for('r_incidentes.detalle', id_inc=r.id_incidente) }}" class="report-item d-flex align-items-center gap-3" style="color:var(--text)">
+        {% if r.foto %}<img src="/uploads/{{ r.foto }}" class="foto-mini" alt="Evidencia">{% else %}<div class="foto-mini"></div>{% endif %}
+        <div class="flex-grow-1" style="min-width:0">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="fw-semibold">{{ r.barrio }}</span>
+            <span class="badge-nivel">{{ r.nivel_agua }}</span>
+            {% set estado = r.estado %}{% include "parciales/estado.html" ignore missing %}
+          </div>
+          <div class="report-meta">{{ r.municipio }} · {{ r.creado_en.strftime('%d %b %Y, %H:%M') }}</div>
+        </div>
+      </a>
+      {% else %}
+      <div class="p-5 text-center">
+        <p class="mb-1 fw-semibold">Aún no has creado reportes</p>
+        <p class="text-muted-f" style="font-size:14px">Cuando informes una inundación, aparecerá aquí con su estado.</p>
+        <a href="{{ url_for('r_incidentes.reportar') }}" class="btn btn-primary-fa">Reportar inundación</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

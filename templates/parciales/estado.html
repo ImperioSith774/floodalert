@@ -1,0 +1,4 @@
+<span class="badge-fa badge-{{ estado if estado is defined else r.estado }}">
+  {{ {'pendiente':'Pendiente','verificado':'Verificado','seguimiento':'En seguimiento',
+      'atendido':'Atendido','cerrado':'Cerrado','rechazado':'Rechazado'}[estado if estado is defined else r.estado] }}
+</span>

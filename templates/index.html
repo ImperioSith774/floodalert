@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="label-eyebrow d-block mb-3">Plataforma comunitaria · Chocó</span>
+        <h1 class="display-1 mb-3">Informa inundaciones.<br>Ayuda a responder&nbsp;antes.</h1>
+        <p class="subtitle-lg mb-4">
+          FloodAlert organiza reportes ciudadanos sobre inundaciones en el Chocó:
+          ubícalos en el mapa, adjunta evidencia y consulta cómo evoluciona cada situación.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <a href="{{ url_for('r_incidentes.reportar') }}" class="btn btn-primary-fa btn-lg-fa">Reportar inundación</a>
+          <a href="{{ url_for('r_mapa.mapa') }}" class="btn btn-secondary-fa btn-lg-fa">Ver mapa</a>
+        </div>
+        <p class="report-meta mb-0">Sin registro para consultar · Verificación humana de cada reporte.</p>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="hero-visual">
+          <div class="hero-visual-bar"><span></span><span></span><span></span></div>
+          <div class="hero-row d-flex">
+
+            <div class="p-3" style="flex:1.1">
+              <span class="label-eyebrow">Última actividad</span>
+              {% for r in recientes %}
+              <div class="py-2 border-bottom d-flex justify-content-between align-items-center" style="border-color:var(--border)!important">
+                <div class="me-2">
+                  <div class="fw-semibold" style="font-size:14px">{{ r.barrio }}</div>
+                  <div class="report-meta">{{ r.municipio }}</div>
+                </div>
+                {% if r.foto %}<img src="/uploads/{{ r.foto }}" class="foto-mini" alt="Evidencia">{% endif %}
+              </div>
+              {% else %}
+              <p class="text-muted-f mt-2 mb-0" style="font-size:13px">Aún no hay reportes. El primero aparecerá aquí.</p>
+              {% endfor %}
+            </div>
+
+            <div class="p-3 border-start" style="flex:1; border-color:var(--border)!important">
+              <span class="label-eyebrow d-block mb-3">Estadísticas</span>
+              <div class="mb-3">
+                <div class="stat-value">{{ resumen.total }}</div>
+                <div class="report-meta">reportes totales</div>
+              </div>
+              <div class="mb-3">
+                <div class="stat-value" style="color:var(--accent)">{{ resumen.verificados }}</div>
+                <div class="report-meta">verificados o en seguimiento</div>
+              </div>
+              <div>
+                <div class="stat-value">{{ resumen.municipios }}</div>
+                <div class="report-meta">municipios con actividad</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ÚLTIMOS REPORTES ============ -->
+<section class="section-pad">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end section-head">
+      <div>
+        <span class="label-eyebrow d-block mb-2">Últimos reportes</span>
+        <h2 class="mb-1">Lo que está ocurriendo ahora</h2>
+        <p class="text-muted-f mb-0" style="font-size:14px">Cada reporte pasa por revisión antes de confirmarse en el mapa.</p>
+      </div>
+      <a href="{{ url_for('r_mapa.mapa') }}" class="btn btn-secondary-fa d-none d-sm-inline-flex">Ver todos</a>
+    </div>
+
+    <div class="card-fa overflow-hidden">
+      {% for r in recientes %}
+      <a href="{{ url_for('r_incidentes.detalle', id_inc=r.id_incidente) }}"
+         class="report-item d-flex align-items-center gap-3 text-body" style="color:var(--text)">
+        {% if r.foto %}
+        <img src="/uploads/{{ r.foto }}" class="foto-mini" alt="Evidencia de {{ r.barrio }}">
+        {% else %}
+        <div class="foto-mini"></div>
+        {% endif %}
+        <div class="flex-grow-1" style="min-width:0">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="fw-semibold">{{ r.barrio }}</span>
+            <span class="badge-nivel">{{ r.nivel_agua }}</span>
+            {% include "parciales/estado.html" ignore missing %}
+          </div>
+          <div class="report-meta text-truncate">
+            {{ r.municipio }} · {{ r.fecha_incidente.strftime('%d %b %Y, %H:%M') }}
+          </div>
+        </div>
+        <span class="text-muted-f d-none d-md-inline" aria-hidden="true">→</span>
+      </a>
+      {% else %}
+      <div class="p-4 text-center">
+        <p class="mb-1 fw-semibold">Todavía no hay reportes</p>
+        <p class="text-muted-f" style="font-size:14px">Sé la primera persona en informar una inundación en tu barrio.</p>
+        <a href="{{ url_for('r_incidentes.reportar') }}" class="btn btn-primary-fa">Crear el primer reporte</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============ CÓMO FUNCIONA ============ -->
+<section class="section-pad" style="border-top:1px solid var(--border); background:var(--surface)">
+  <div class="container">
+    <div class="section-head">
+      <span class="label-eyebrow d-block mb-2">Cómo funciona</span>
+      <h2 class="mb-1">Tres pasos, información útil</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="stat-value" style="color:var(--accent)">01</div>
+        <h5 class="mt-2 mb-1">Reporta</h5>
+        <p class="text-muted-f mb-0" style="font-size:14px">
+          Describe lo que ves, marca el punto en el mapa del Chocó y adjunta una fotografía si la tienes.
+        </p>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-value" style="color:var(--accent)">02</div>
+        <h5 class="mt-2 mb-1">Se verifica</h5>
+        <p class="text-muted-f mb-0" style="font-size:14px">
+          El equipo administrativo revisa la descripción y la evidencia antes de confirmar el incidente.
+        </p>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-value" style="color:var(--accent)">03</div>
+        <h5 class="mt-2 mb-1">Se da seguimiento</h5>
+        <p class="text-muted-f mb-0" style="font-size:14px">
+          El reporte mantiene un estado público (verificado, en seguimiento, atendido) y un historial completo.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
