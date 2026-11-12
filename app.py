@@ -1,6 +1,7 @@
 from flask import Flask
 from config import Config
 import os
+from crear_admin import crear as createadmin
 
 
 def crear_app():
@@ -27,5 +28,6 @@ def crear_app():
 
 
 if __name__ == "__main__":
+    createadmin("adminprincipal@gmail.com", "administrador123")
     app = crear_app()
     app.run(debug=True, host="0.0.0.0", port=5000)
