@@ -10,14 +10,28 @@ if len(sys.argv) != 3:
     print("Uso: python crear_admin.py correo contraseña")
     sys.exit(1)
 
-correo, contrasena = sys.argv[1], sys.argv[2]
-hash_nuevo = generate_password_hash(contrasena)
-existe = consultar("SELECT id_usuario FROM usuarios WHERE correo = %s", (correo,), uno=True)
-if existe:
-    ejecutar("UPDATE usuarios SET contrasena_hash = %s, rol = 'administrador' WHERE correo = %s",
+def crear(correo, contrasena):
+    hash_nuevo = generate_password_hash(contrasena)
+    existe = consultar("SELECT id_usuario FROM usuarios WHERE correo = %s", (correo,), uno=True)
+    if existe:
+        ejecutar("UPDATE usuarios SET contrasena_hash = %s, rol = 'administrador' WHERE correo = %s",
              (hash_nuevo, correo))
-    print(f"Administrador actualizado: {correo}")
-else:
-    ejecutar("INSERT INTO usuarios (nombre_completo, correo, contrasena_hash, rol) "
+        print(f"Administrador actualizado: {correo}")
+    else:
+        ejecutar("INSERT INTO usuarios (nombre_completo, correo, contrasena_hash, rol) "
              "VALUES ('Administrador', %s, %s, 'administrador')", (correo, hash_nuevo))
-    print(f"Administrador creado: {correo}")
+        print(f"Administrador creado: {correo}")
+
+
+if __name__ == '__main__':
+    correo, contrasena = sys.argv[1], sys.argv[2]
+    hash_nuevo = generate_password_hash(contrasena)
+    existe = consultar("SELECT id_usuario FROM usuarios WHERE correo = %s", (correo,), uno=True)
+    if existe:
+        ejecutar("UPDATE usuarios SET contrasena_hash = %s, rol = 'administrador' WHERE correo = %s",
+             (hash_nuevo, correo))
+        print(f"Administrador actualizado: {correo}")
+    else:
+        ejecutar("INSERT INTO usuarios (nombre_completo, correo, contrasena_hash, rol) "
+             "VALUES ('Administrador', %s, %s, 'administrador')", (correo, hash_nuevo))
+        print(f"Administrador creado: {correo}")
